@@ -27,6 +27,12 @@ export function isoDate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/** "2026-10-08" → Date local (sem passar por UTC). */
+export function parseIso(iso: string): Date {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
+}
+
 export function addDays(date: Date, days: number): Date {
   const copy = new Date(date);
   copy.setDate(copy.getDate() + days);
@@ -85,8 +91,12 @@ export function createMovieService(client: TmdbClient, options: MovieServiceOpti
    * aqui em outubro viria com "agosto". Para esses casos, buscamos a data brasileira.
    */
   async function withRegionalDates(page: Paged<MovieSummary>, from: string, to: string): Promise<Paged<MovieSummary>> {
+    // Rede de segurança contra RELANÇAMENTOS: mesmo com o filtro na consulta, descarta qualquer
+    // filme cujo lançamento original (mundial) foi há mais de 1 ano — ex.: Shrek (2001) em sessão especial.
+    const cutoff = isoDate(addDays(parseIso(from), -365));
+    const recent = page.results.filter((movie) => !movie.releaseDate || movie.releaseDate >= cutoff);
     const results = await Promise.all(
-      page.results.map(async (movie) => {
+      recent.map(async (movie) => {
         if (movie.releaseDate && movie.releaseDate >= from && movie.releaseDate <= to) return movie;
         const dates = await regionalTheatricalDates(movie.id).catch(() => []);
         // A data que cai DENTRO do período pedido (um filme pode ter mais de uma, ex.: pré-estreia).
@@ -137,8 +147,11 @@ export function createMovieService(client: TmdbClient, options: MovieServiceOpti
       }) as Promise<Paged<MovieSummary>>;
     },
 
-    nowPlaying(page = 1) {
-      return moviePage('/movie/now_playing', { region, page: clampPage(page) }, HOUR);
+    async nowPlaying(page = 1): Promise<Paged<MovieSummary>> {
+      const data = await moviePage('/movie/now_playing', { region, page: clampPage(page) }, HOUR);
+      // "Em cartaz" também traz relançamentos (sessões especiais de filmes antigos): ficam de fora.
+      const cutoff = isoDate(addDays(today(), -365));
+      return { ...data, results: data.results.filter((m) => !m.releaseDate || m.releaseDate >= cutoff) };
     },
 
     trending() {

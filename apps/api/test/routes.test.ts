@@ -77,6 +77,25 @@ describe('data de estreia regional', () => {
     expect(sent['primary_release_date.gte']).toBe('2025-10-07');
   });
 
+  it('descarta relançamentos mesmo se o TMDB devolver filmes antigos', async () => {
+    const oldMovieClient: TmdbClient = {
+      async get(path, _params, schema) {
+        if (path !== '/discover/movie') return schema.parse({ results: [] });
+        return schema.parse({
+          page: 1,
+          total_pages: 1,
+          total_results: 2,
+          results: [
+            { id: 808, title: 'Shrek', release_date: '2001-05-18' },
+            { id: 9, title: 'Filme novo', release_date: '2026-10-15' },
+          ],
+        });
+      },
+    };
+    const page = await createMovieService(oldMovieClient, { region: 'BR', today }).upcoming();
+    expect(page.results.map((m) => m.title)).toEqual(['Filme novo']);
+  });
+
   it('troca a data mundial pela data de cinema no Brasil', async () => {
     const fakeClient: TmdbClient = {
       async get(path, _params, schema) {

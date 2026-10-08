@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import fastifyStatic from '@fastify/static';
 import type { ApiError } from '@tracker/shared';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { ZodError } from 'zod';
@@ -50,7 +49,8 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
       request.log.error(error);
       body = { statusCode: 500, error: 'Internal Server Error', message: 'Erro inesperado no servidor.' };
     }
-    reply.status(body.statusCode).send(body);
+    // Erros nunca ficam guardados em cache (no navegador ou no Netlify).
+    reply.header('Cache-Control', 'no-store').status(body.statusCode).send(body);
   });
 
   app.get('/api/health', async () => ({ ok: true, mode: options.mode }));
@@ -59,6 +59,8 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   // Produção: serve o build do React e devolve index.html para as rotas do front (SPA).
   if (options.webDist && existsSync(join(options.webDist, 'index.html'))) {
+    // Import sob demanda: na Netlify Function o site é servido pelo próprio Netlify e este plugin nem é carregado.
+    const { default: fastifyStatic } = await import('@fastify/static');
     await app.register(fastifyStatic, { root: options.webDist });
     app.setNotFoundHandler((request, reply) => {
       if (request.url.startsWith('/api/')) {

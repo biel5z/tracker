@@ -162,6 +162,7 @@ export function createMockTmdbClient(options: MockClientOptions = {}): TmdbClien
       const filtered = movies.filter(
         (m) =>
           m.release_date >= gte &&
+          m.release_date >= String(params['primary_release_date.gte'] ?? '0000') &&
           m.release_date <= lte &&
           (!params.with_genres || m.genre_ids.includes(Number(params.with_genres))) &&
           (!params.primary_release_year || m.release_date.startsWith(String(params.primary_release_year))) &&

@@ -7,7 +7,7 @@ import { useSyncExternalStore } from 'react';
  * Qualquer componente que use `useLibrary()` re-renderiza quando o store muda —
  * inclusive em outras abas (evento "storage").
  *
- * Fase 4 do roadmap: trocar o localStorage por chamadas ao BFF (SQLite) mantendo esta mesma API.
+ * Decisão de projeto: sem banco de dados. As listas são pessoais e ficam neste navegador.
  */
 
 export interface MovieSnapshot {
