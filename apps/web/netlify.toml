@@ -1,0 +1,33 @@
+# Configuração do Netlify — lida automaticamente quando o site é publicado.
+# No painel do Netlify, escolha o projeto "@tracker/web" (pasta apps/web).
+# O Netlify instala as dependências e roda o build na RAIZ do repositório;
+# por isso os caminhos abaixo começam na raiz.
+
+[build]
+  # Gera o site (React) em apps/web/dist
+  command = "npm run build"
+  publish = "/apps/web/dist"
+  # Onde ficam as "functions" (o BFF rodando no formato do Netlify)
+  functions = "/apps/web/netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  # O Fastify vai como pacote normal, sem ser "empacotado" junto (evita problemas no build).
+  external_node_modules = ["fastify"]
+
+# As regras abaixo são lidas de cima para baixo; a primeira que bater vale.
+
+# 1) Tudo que começa com /api vai para a function "api" (o BFF).
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# 2) Qualquer outra rota (ex.: /filme/123) abre o React, que decide a página.
+#    Sem isso, atualizar a página em /filme/123 daria "Page not found".
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

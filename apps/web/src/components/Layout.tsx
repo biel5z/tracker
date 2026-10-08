@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, ScrollRestoration, useNavigate } from 'react-rou
 import { cn } from '../lib/cn.ts';
 import { todayIso } from '../lib/format.ts';
 import { useLibrary, WATCHLIST_ID } from '../lib/library.ts';
-import { SearchIcon } from './icons.tsx';
+import { InstagramIcon, MailIcon, SearchIcon } from './icons.tsx';
 
 const NAV = [
   { to: '/', label: 'Início', end: true },
@@ -85,16 +85,37 @@ export function Layout() {
       </main>
 
       <footer className="mt-16 border-t border-line/60">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer" aria-label="The Movie Database (TMDB)">
-              <img src="/tmdb-logo.svg" alt="TMDB" className="h-4 w-auto" />
-            </a>
-            <p>Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB.</p>
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 text-sm text-muted">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer" aria-label="The Movie Database (TMDB)">
+                <img src="/tmdb-logo.svg" alt="TMDB" className="h-4 w-auto" />
+              </a>
+              <p>Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB.</p>
+            </div>
+            <Link to="/sobre" className="hover:text-white">
+              Sobre e créditos
+            </Link>
           </div>
-          <Link to="/sobre" className="hover:text-white">
-            Sobre e créditos
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line/40 pt-6">
+            <p>
+              Feito por <span className="font-medium text-white">Gabriel Correia Reis</span>
+            </p>
+            <a
+              href="https://www.instagram.com/gabcorreiareis/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram de Gabriel Correia Reis: @gabcorreiareis"
+              className="inline-flex items-center gap-1.5 hover:text-white"
+            >
+              <InstagramIcon size={16} />
+              @gabcorreiareis
+            </a>
+            <a href="mailto:correiareisg@gmail.com" className="inline-flex items-center gap-1.5 hover:text-white">
+              <MailIcon size={16} />
+              correiareisg@gmail.com
+            </a>
+          </div>
         </div>
       </footer>
 

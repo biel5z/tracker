@@ -10,7 +10,7 @@ import type {
 } from '@tracker/shared';
 import { HOUR, MINUTE, TtlCache } from '../cache.ts';
 import type { QueryParams, TmdbClient } from './client.ts';
-import { findRegionalRelease, TMDB_MAX_PAGE, toMovieDetail, toPaged, toPersonDetail } from './mappers.ts';
+import { TMDB_MAX_PAGE, toMovieDetail, toPaged, toPersonDetail } from './mappers.ts';
 import { genreListSchema, movieDetailSchema, moviePageSchema, personSchema, releaseDatesSchema } from './schemas.ts';
 
 export interface MovieServiceOptions {
@@ -67,12 +67,16 @@ export function createMovieService(client: TmdbClient, options: MovieServiceOpti
     ) as Promise<Paged<MovieSummary>>;
   }
 
-  /** Data de estreia nos cinemas do país configurado (cache de 24 h). */
-  async function regionalReleaseDate(movieId: number): Promise<string | null> {
+  /** Todas as datas de cinema (tipos 2 e 3) do filme no país configurado, em ordem (cache de 24 h). */
+  async function regionalTheatricalDates(movieId: number): Promise<string[]> {
     return cache.getOrLoad(`release:${movieId}`, 24 * HOUR, async () => {
       const data = await client.get(`/movie/${movieId}/release_dates`, {}, releaseDatesSchema);
-      return findRegionalRelease(data.results, region).date;
-    }) as Promise<string | null>;
+      const entry = data.results.find((r) => r.iso_3166_1 === region);
+      return (entry?.release_dates ?? [])
+        .filter((d) => d.type === 2 || d.type === 3)
+        .map((d) => d.release_date.slice(0, 10))
+        .sort();
+    }) as Promise<string[]>;
   }
 
   /**
@@ -84,7 +88,9 @@ export function createMovieService(client: TmdbClient, options: MovieServiceOpti
     const results = await Promise.all(
       page.results.map(async (movie) => {
         if (movie.releaseDate && movie.releaseDate >= from && movie.releaseDate <= to) return movie;
-        const date = await regionalReleaseDate(movie.id).catch(() => null);
+        const dates = await regionalTheatricalDates(movie.id).catch(() => []);
+        // A data que cai DENTRO do período pedido (um filme pode ter mais de uma, ex.: pré-estreia).
+        const date = dates.find((d) => d >= from && d <= to);
         return date ? { ...movie, releaseDate: date } : movie;
       }),
     );
@@ -112,6 +118,9 @@ export function createMovieService(client: TmdbClient, options: MovieServiceOpti
         with_release_type: '2|3', // 2 = cinema (limitado), 3 = cinema
         'release_date.gte': from,
         'release_date.lte': to,
+        // Exclui RELANÇAMENTOS: filme lançado originalmente há mais de 1 ano que volta aos cinemas
+        // (ex.: Shrek em sessão especial) também conta como "estreia" para o TMDB.
+        'primary_release_date.gte': isoDate(addDays(start, -365)),
         with_genres: filters.genre,
         sort_by: filters.sort === 'popularidade' ? 'popularity.desc' : 'primary_release_date.asc',
         include_adult: false,

@@ -2,6 +2,8 @@
 
 Catálogo de filmes com foco nas **estreias nos cinemas do Brasil**: filmes em cartaz, catálogo completo com filtros, elenco com fotos, trailers, listas pessoais e agenda de cinema (exporta `.ics`).
 
+Resumo em linguagem simples (sem termos técnicos): [`docs/Resumo do projeto.pdf`](docs/Resumo%20do%20projeto.pdf) e [`docs/Visual e referencias.pdf`](docs/Visual%20e%20referencias.pdf).
+
 Dados: [TMDB](https://www.themoviedb.org/). Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB.
 
 ---
@@ -104,7 +106,18 @@ tracker/
 | Estado global simples (`useSyncExternalStore`) | `apps/web/src/lib/library.ts` |
 | Testes com API simulada (MSW) | `apps/web/src/pages/*.test.tsx` |
 
-## Próximos passos (fase 4)
+## Decisão: sem banco de dados
 
-- Trocar o `localStorage` das listas/agenda por SQLite no BFF (Drizzle ORM) — a API de `lib/library.ts` já está pronta para isso.
-- Login simples para ter as listas em mais de um dispositivo.
+As listas e a agenda ficam salvas no navegador de cada pessoa (`localStorage`). Um banco de dados exigiria login e um serviço de banco hospedado, o que não compensa para um site de estudo e de informação. A contrapartida é que as listas não acompanham a pessoa de um aparelho para outro.
+
+## Publicar no Netlify
+
+O site (React) é servido pelo Netlify, e o BFF roda como **Netlify Function** (`apps/web/netlify/functions/api.mts`), reaproveitando o mesmo código de `apps/api`. A configuração está em `apps/web/netlify.toml`.
+
+1. Suba o projeto para um repositório no GitHub (o `.env` fica de fora automaticamente).
+2. No Netlify: **Add new project → Import an existing project → GitHub** e escolha o repositório.
+3. Em **Site/Project to deploy**, escolha **`@tracker/web`**. As configurações de build são lidas do `netlify.toml`.
+4. Antes de publicar, em **Environment variables**, adicione `TMDB_TOKEN` com o seu token (escopo que inclua **Functions**).
+5. Clique em **Deploy**. A cada `git push`, o Netlify publica de novo sozinho.
+
+Sem o `TMDB_TOKEN`, o site publicado mostra os dados de exemplo.

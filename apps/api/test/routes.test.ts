@@ -65,6 +65,18 @@ describe('rotas do BFF', () => {
 });
 
 describe('data de estreia regional', () => {
+  it('não traz relançamentos de filmes antigos', async () => {
+    let sent: Record<string, unknown> = {};
+    const spyClient: TmdbClient = {
+      async get(_path, params, schema) {
+        sent = params;
+        return schema.parse({ page: 1, total_pages: 1, total_results: 0, results: [] });
+      },
+    };
+    await createMovieService(spyClient, { region: 'BR', today }).upcoming();
+    expect(sent['primary_release_date.gte']).toBe('2025-10-07');
+  });
+
   it('troca a data mundial pela data de cinema no Brasil', async () => {
     const fakeClient: TmdbClient = {
       async get(path, _params, schema) {
@@ -82,7 +94,13 @@ describe('data de estreia regional', () => {
             : {
                 results: [
                   { iso_3166_1: 'US', release_dates: [{ release_date: '2026-08-01T00:00:00Z', type: 3 }] },
-                  { iso_3166_1: 'BR', release_dates: [{ release_date: '2026-10-22T00:00:00Z', type: 3 }] },
+                  {
+                    iso_3166_1: 'BR',
+                    release_dates: [
+                      { release_date: '2026-05-01T00:00:00Z', type: 2 }, // exibição antiga em festival: fora do período
+                      { release_date: '2026-10-22T00:00:00Z', type: 3 },
+                    ],
+                  },
                 ],
               };
         return schema.parse(raw);
