@@ -1,0 +1,87 @@
+@import 'tailwindcss';
+
+/*
+ * Tema do site (Tailwind v4): as variáveis abaixo viram classes como
+ * bg-surface, text-muted, border-line, text-accent etc.
+ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #0b0b10;
+  --color-surface: #14141c;
+  --color-raised: #1c1c27;
+  --color-line: #2a2a38;
+  --color-muted: #9a9ab0;
+  --color-soft: #c9c9d8;
+  --color-accent: #f5b83d;
+  --color-accent-strong: #ffcf66;
+  --color-danger: #ff6b6b;
+  --color-success: #4fd18b;
+
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-ink font-sans text-soft antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-display text-white;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.8);
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Classes reutilizáveis. Em Tailwind v4, @utility permite usar @apply entre elas. */
+@utility skeleton {
+  /* Bloco cinza animado usado pelos skeletons. */
+  @apply animate-shimmer rounded-md;
+  background-color: var(--color-raised);
+  background-image: linear-gradient(90deg, transparent 0, rgb(255 255 255 / 0.06) 50%, transparent 100%);
+  background-size: 400px 100%;
+  background-repeat: no-repeat;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-ink hover:bg-accent-strong;
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-surface text-soft hover:border-muted hover:text-white;
+}
+@utility btn-active {
+  @apply border-accent bg-accent/15 text-accent hover:border-accent hover:text-accent;
+}
+
+@utility chip {
+  @apply rounded-full border border-line px-3 py-1 text-sm text-soft transition hover:border-muted hover:text-white;
+}
+@utility chip-active {
+  @apply border-accent bg-accent/15 text-accent hover:border-accent hover:text-accent;
+}
+
+@utility field {
+  @apply rounded-lg border border-line bg-surface px-3 py-2 text-sm text-white placeholder:text-muted focus:border-accent focus:outline-none disabled:opacity-50;
+}
+
+@utility scroll-row {
+  /* Faixa horizontal com rolagem (carrosséis). */
+  @apply flex snap-x gap-4 overflow-x-auto pb-3;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}

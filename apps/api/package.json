@@ -1,0 +1,24 @@
+{
+  "name": "@tracker/api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:mock": "tsx watch src/server.ts --mock",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/static": "^10.1.5",
+    "@tracker/shared": "*",
+    "fastify": "^5.12.5",
+    "tsx": "^4.23.15",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "vitest": "^5.0.3"
+  }
+}

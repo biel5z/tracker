@@ -1,0 +1,29 @@
+{
+  "name": "tracker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tracker de Estreias de Cinema — catálogo de filmes com foco em estreias no Brasil (dados do TMDB).",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
+    "dev:mock": "concurrently -n api,web -c cyan,magenta \"npm run dev:mock -w apps/api\" \"npm run dev -w apps/web\"",
+    "build": "npm run build -w apps/web",
+    "start": "npm run start -w apps/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "shell-quote": "^1.12.0"
+  }
+}
