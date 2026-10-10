@@ -7,6 +7,7 @@ import { MapPinIcon } from '../components/icons.tsx';
 import { MovieGrid } from '../components/MovieGrid.tsx';
 import { EmptyState, ErrorState } from '../components/States.tsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.ts';
+import { useDragScroll } from '../hooks/useDragScroll.ts';
 import { ApiRequestError } from '../lib/api.ts';
 import { formatDate, parseLocalDate, todayIso } from '../lib/format.ts';
 import { queries } from '../lib/queries.ts';
@@ -53,6 +54,7 @@ export function PersonPage() {
 
 function PersonView({ person }: { person: PersonDetail }) {
   const [expanded, setExpanded] = useState(false);
+  const photosRef = useDragScroll<HTMLDivElement>();
   const longBio = person.biography.length > 700;
   const today = todayIso();
 
@@ -129,7 +131,7 @@ function PersonView({ person }: { person: PersonDetail }) {
       {person.images.length > 1 && (
         <section className="space-y-4">
           <h2 className="text-xl font-bold sm:text-2xl">Fotos</h2>
-          <div className="scroll-row -mx-4 px-4">
+          <div ref={photosRef} className="scroll-row drag-scroll -mx-4 px-4">
             {person.images.slice(0, 12).map((path) => (
               <img key={path} src={tmdbImage(path, 'w185') ?? ''} alt={person.name} loading="lazy" className="aspect-[2/3] w-32 shrink-0 rounded-xl object-cover" />
             ))}

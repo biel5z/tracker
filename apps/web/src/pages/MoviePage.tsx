@@ -10,6 +10,7 @@ import { Poster } from '../components/Poster.tsx';
 import { EmptyState, ErrorState } from '../components/States.tsx';
 import { TrailerModal } from '../components/TrailerModal.tsx';
 import { useDocumentTitle } from '../hooks/useDocumentTitle.ts';
+import { useDragScroll } from '../hooks/useDragScroll.ts';
 import { ApiRequestError } from '../lib/api.ts';
 import { daysUntil, formatDate, formatRating, formatRuntime, releaseLabel, yearOf } from '../lib/format.ts';
 import { queries } from '../lib/queries.ts';
@@ -151,11 +152,12 @@ function MovieView({ movie }: { movie: MovieDetail }) {
 }
 
 function CastSection({ movie }: { movie: MovieDetail }) {
+  const dragRef = useDragScroll<HTMLUListElement>();
   if (movie.cast.length === 0) return null;
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-bold sm:text-2xl">Elenco</h2>
-      <ul className="scroll-row -mx-4 px-4">
+      <ul ref={dragRef} className="scroll-row drag-scroll -mx-4 px-4">
         {movie.cast.map((person) => (
           <li key={`${person.id}-${person.order}`} className="w-28 shrink-0 snap-start sm:w-32">
             <Link to={`/pessoa/${person.id}`} className="group block">

@@ -68,9 +68,9 @@ tracker/
 │  └─ web/                     # Front: React + Vite + TanStack Query + Tailwind
 │     └─ src/
 │        ├─ pages/             # Home, Estreias, Catálogo, Filme, Pessoa, Listas, Agenda, Sobre
-│        ├─ components/        # MovieCard, skeletons, Pagination, TrailerModal…
-│        ├─ hooks/             # useDebouncedValue, useInView, useDelayedFlag
-│        └─ lib/               # api.ts, queries.ts, library.ts (localStorage), ics.ts, format.ts
+│        ├─ components/        # MovieCard, skeletons, Pagination, TrailerModal, YoutubePlayer…
+│        ├─ hooks/             # useDebouncedValue, useInView, useDelayedFlag, useDragScroll
+│        └─ lib/               # api.ts, queries.ts, library.ts (localStorage), ics.ts, format.ts, youtubeApi.ts
 └─ packages/
    └─ shared/                  # tipos usados pelos dois lados
 ```
@@ -100,6 +100,8 @@ tracker/
 | **Loading skeletons** | `components/MovieCard.tsx` (`MovieCardSkeleton`), `hooks/useDelayedFlag.ts` |
 | **Filtros dinâmicos na URL** + debounce | `pages/CatalogPage.tsx`, `hooks/useDebouncedValue.ts` |
 | Prefetch ao passar o mouse | `components/MovieCard.tsx` |
+| **Segurar e arrastar** os carrosséis com o mouse | `hooks/useDragScroll.ts`, classe `drag-scroll` em `index.css` |
+| Carregamento sob demanda (`React.lazy`) do player de trailer | `components/TrailerModal.tsx`, `components/YoutubePlayer.tsx` |
 | Retry com backoff (429/5xx) | `apps/api/src/tmdb/client.ts`, `apps/web/src/main.tsx` |
 | Cache com TTL + deduplicação | `apps/api/src/cache.ts` |
 | Validação de resposta externa | `apps/api/src/tmdb/schemas.ts` |
@@ -109,6 +111,12 @@ tracker/
 ## Decisão: sem banco de dados
 
 As listas e a agenda ficam salvas no navegador de cada pessoa (`localStorage`). Um banco de dados exigiria login e um serviço de banco hospedado, o que não compensa para um site de estudo e de informação. A contrapartida é que as listas não acompanham a pessoa de um aparelho para outro.
+
+## Carrosséis e trailers
+
+- **Carrosséis** (filmes, elenco, fotos): no computador, dá para segurar com o mouse e arrastar para os lados, sem precisar da barra de rolagem. Um clique simples continua abrindo o filme. No celular, o dedo já rola normalmente.
+- **Trailers**: tocam no player [`lit-player-youtube`](https://www.npmjs.com/package/lit-player-youtube), com controles próprios por cima do vídeo do YouTube. O player só é baixado quando alguém abre um trailer, e o vídeo **não começa sozinho** (é preciso clicar no play).
+- A lib só inicia o player quando a API do YouTube avisa que está pronta, e esse aviso acontece uma vez por página. Por isso o projeto carrega a API antes (`lib/youtubeApi.ts`) e inicia o player por conta própria (`components/YoutubePlayer.tsx`). Sem isso, o trailer ficaria em branco a partir da segunda vez que fosse aberto.
 
 ## Publicar no Netlify
 

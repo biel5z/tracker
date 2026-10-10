@@ -1,5 +1,6 @@
 import type { MovieSummary } from '@tracker/shared';
 import { Link } from 'react-router';
+import { useDragScroll } from '../hooks/useDragScroll.ts';
 import { ChevronRightIcon } from './icons.tsx';
 import { MovieCard, MovieCardSkeleton } from './MovieCard.tsx';
 import { ErrorState } from './States.tsx';
@@ -17,6 +18,7 @@ interface MovieRowProps {
 
 /** Carrossel horizontal com skeleton próprio — cada seção da home carrega independente. */
 export function MovieRow({ title, description, link, movies, isPending, error, onRetry, showRelease }: MovieRowProps) {
+  const dragRef = useDragScroll<HTMLDivElement>();
   return (
     <section className="space-y-4" aria-busy={isPending}>
       <div className="flex items-end justify-between gap-4">
@@ -35,7 +37,7 @@ export function MovieRow({ title, description, link, movies, isPending, error, o
       {error ? (
         <ErrorState error={error} onRetry={onRetry} compact />
       ) : (
-        <div className="scroll-row -mx-4 px-4">
+        <div ref={dragRef} className="scroll-row drag-scroll -mx-4 px-4">
           {isPending || !movies
             ? Array.from({ length: 8 }, (_, i) => (
                 <div key={i} className="w-36 shrink-0 sm:w-44">

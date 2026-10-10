@@ -85,3 +85,19 @@
   scrollbar-width: thin;
   scrollbar-color: var(--color-line) transparent;
 }
+
+@utility drag-scroll {
+  /* Faixa que dá para "segurar e arrastar" com o mouse (ver hooks/useDragScroll.ts).
+     Só em telas com mouse: no toque o cursor não existe e a rolagem já é nativa. */
+  @media (pointer: fine) {
+    cursor: grab;
+    user-select: none;
+    & a {
+      cursor: grab;
+    }
+    &[data-dragging],
+    &[data-dragging] * {
+      cursor: grabbing;
+    }
+  }
+}
